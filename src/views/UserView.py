@@ -54,14 +54,14 @@ def create():
   user_in_db = UserModel.get_user_by_email(data.get('email'))
   if user_in_db:
     message = {'error': 'User already exist, please supply another email address'}
-    return custom_response(message, 400)
+    return custom_response(message, 401)
   
   user = UserModel(data)
   user.save()
   ser_data = user_schema.dump(user).data
   #gerar token do utilizador e será usado posteriormente para decodificar token do utilizado
   token = Auth.generate_token(ser_data.get('id'))
-  return custom_response({'jwt_token': token}, 201)
+  return custom_response({'jwt_token': token}, 200)
 
 
 @user_api.route('/', methods=['GET'])
@@ -86,7 +86,7 @@ def get_a_user(user_id):
   """
   user = UserModel.get_one_user(user_id)
   if not user:
-    return custom_response({'error': 'user not found'}, 404)
+    return custom_response({'error': 'user not found'}, 400)
   
   ser_user = user_schema.dump(user).data
   return custom_response(ser_user, 200)
@@ -117,7 +117,7 @@ def delete():
   """
   user = UserModel.get_one_user(g.user.get('id'))
   user.delete()
-  return custom_response({'message': 'deleted'}, 204)
+  return custom_response({'message': 'deleted'}, 200)
 
 
 @user_api.route('/me', methods=['GET'])

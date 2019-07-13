@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
-#/src/views/ContaView.py
+#/src/views/ProfessionView.py
 
 """
     ...Web Flask com autorização JWT (Jason web token authorization)
     ------------------------------------------------------------------------
-                        API do Conta
+                        API do Profession
     ------------------------------------------------------------------------
     
     URLs: https://codeburst.io/jwt-authorization-in-flask-c63c1acf4eeb
@@ -17,20 +17,18 @@
 
 from flask import request, g, Blueprint, json, Response
 from ..shared.Authentication import Auth
-from ..models.ContaModel import ContaModel, ContaSchema
-from ..models.ClienteModel import ClienteModel, ClienteSchema
+from ..models.ProfessionModel import ProfessionModel, ProfessionSchema
 
-conta_api = Blueprint('conta_api', __name__)
-conta_schema = ContaSchema()
-cliente_schema= ClienteSchema()
+profession_api = Blueprint('profession_api', __name__)
+profession_schema = ProfessionSchema()
 
 
 
-@conta_api.route('/', methods=['POST'])
+@profession_api.route('/', methods=['POST'])
 @Auth.auth_required
 def create():
   """
-  Create Conta Function
+  Create Profession Function
   """
   ##para obter o objeto JSON do corpo da solicitação
   req_data = request.get_json()
@@ -38,91 +36,83 @@ def create():
   #validar e desserializar dados json de entrada do usuário
   req_data['owner_id'] = g.user.get('id')
 
-  data, error = conta_schema.load(req_data)
+  data, error = profession_schema.load(req_data)
   if error:
     return custom_response(error, 400)
 
-  post_conta= ContaModel.get_conta_by_nossonumero(req_data['nosso_numero'])
-  if post_conta:
+  post_profession= ProfessionModel.get_profession_by_nossonumero(req_data['nosso_numero'])
+  if post_profession:
     message = {'error': 'Value nosso_numero already exists'}
     return custom_response(message, 400)
 
-  #consultar dados de Entity
-  post_cliente= ClienteModel.get_one_cliente(req_data['cliente_id'])
-  if not post_cliente:
-    return custom_response({'error': 'account in post not found'}, 404)
-  data_cliente = cliente_schema.dump(post_cliente).data
-
-  req_data['cliente_id']= data_cliente['id']
-
-  post = ContaModel(data)
+  post = ProfessionModel(data)
   post.save()
-  data = conta_schema.dump(post).data
+  data = profession_schema.dump(post).data
   return custom_response(data, 201)
 
 
 
 
-@conta_api.route('/', methods=['GET'])
+@profession_api.route('/', methods=['GET'])
 def get_all():
   """
-  Get All Contas
+  Get All Professions
   """
-  posts = ContaModel.get_all_contas()
-  data = conta_schema.dump(posts, many=True).data
+  posts = ProfessionModel.get_all_professions()
+  data = profession_schema.dump(posts, many=True).data
   return custom_response(data, 200)
 
 
 
 
-@conta_api.route('/<int:conta_id>', methods=['GET'])
-def get_one(conta_id):
+@profession_api.route('/<int:profession_id>', methods=['GET'])
+def get_one(profession_id):
   """
-  Get A Conta
+  Get A Profession
   """
-  post = ContaModel.get_one_conta(conta_id)
+  post = ProfessionModel.get_one_profession(profession_id)
   if not post:
     return custom_response({'error': 'post not found'}, 404)
-  data = conta_schema.dump(post).data
+  data = profession_schema.dump(post).data
   return custom_response(data, 200)
 
 
 
 
-@conta_api.route('/<int:conta_id>', methods=['PUT'])
+@profession_api.route('/<int:profession_id>', methods=['PUT'])
 @Auth.auth_required
-def update(conta_id):
+def update(profession_id):
   """
-  Update A Conta
+  Update A Profession
   """
   req_data = request.get_json()
-  post = ContaModel.get_one_conta(conta_id)
+  post = ProfessionModel.get_one_profession(profession_id)
   if not post:
     return custom_response({'error': 'post not found'}, 404)
-  data = conta_schema.dump(post).data
+  data = profession_schema.dump(post).data
   if data.get('owner_id') != g.user.get('id'):
     return custom_response({'error': 'permission denied'}, 400)
   
-  data, error = conta_schema.load(req_data, partial=True)
+  data, error = profession_schema.load(req_data, partial=True)
   if error:
     return custom_response(error, 400)
   post.update(data)
   
-  data = conta_schema.dump(post).data
+  data = profession_schema.dump(post).data
   return custom_response(data, 200)
 
 
 
-@conta_api.route('/<int:conta_id>', methods=['DELETE'])
+@profession_api.route('/<int:profession_id>', methods=['DELETE'])
 @Auth.auth_required
-def delete(conta_id):
+def delete(profession_id):
   """
-  Delete A Conta
+  Delete A Profession
   """
-  post = ContaModel.get_one_conta(conta_id)
+  post = ProfessionModel.get_one_profession(profession_id)
   if not post:
     return custom_response({'error': 'post not found'}, 404)
-  data = conta_schema.dump(post).data
+  data = profession_schema.dump(post).data
   if data.get('owner_id') != g.user.get('id'):
     return custom_response({'error': 'permission denied'}, 400)
 

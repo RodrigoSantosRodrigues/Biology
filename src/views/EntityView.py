@@ -44,18 +44,18 @@ def create():
   document_in_db = EntityModel.get_entity_by_documento(data.get('documento'))
   if document_in_db:
     message = {'error': 'Document already exists for this user, please supply another document'}
-    return custom_response(message, 400)
+    return custom_response(message, 401)
   
   # check if user already exist in the db
   user_in_db = EntityModel.get_entity_by_user(data.get('owner_id'))
   if user_in_db:
     message = {'error': 'There is already a registration for this user'}
-    return custom_response(message, 400)
+    return custom_response(message, 402)
   
   post = EntityModel(data)
   post.save()
   data = entity_schema.dump(post).data
-  return custom_response(data, 201)
+  return custom_response(data, 200)
 
 
 
@@ -81,7 +81,7 @@ def get_one(entity_id):
   """
   post = EntityModel.get_one_entity(entity_id)
   if not post:
-    return custom_response({'error': 'post not found'}, 404)
+    return custom_response({'error': 'post not found'}, 400)
   data = entity_schema.dump(post).data
   return custom_response(data, 200)
 
@@ -97,27 +97,27 @@ def update(entity_id):
   req_data = request.get_json()
   post = EntityModel.get_one_entity(entity_id)
   if not post:
-    return custom_response({'error': 'post not found'}, 404)
+    return custom_response({'error': 'post not found'}, 400)
   data = entity_schema.dump(post).data
   if data.get('owner_id') != g.user.get('id'):
-    return custom_response({'error': 'permission denied'}, 400)
+    return custom_response({'error': 'permission denied'}, 401)
   
   data, error = entity_schema.load(req_data, partial=True)
   if error:
-    return custom_response(error, 400)
+    return custom_response(error, 402)
   post.update(data)
 
   # check if documento already exist in the db
   document_in_db = EntityModel.get_entity_by_documento(data.get('documento'))
   if document_in_db:
     message = {'error': 'Document already exists for this user, please supply another document'}
-    return custom_response(message, 400)
+    return custom_response(message, 403)
   
   # check if user already exist in the db
   user_in_db = EntityModel.get_entity_by_user(data.get('owner_id'))
   if user_in_db:
     message = {'error': 'There is already a registration for this user'}
-    return custom_response(message, 400)
+    return custom_response(message, 404)
   
   data = entity_schema.dump(post).data
   return custom_response(data, 200)
@@ -132,13 +132,13 @@ def delete(entity_id):
   """
   post = EntityModel.get_one_entity(entity_id)
   if not post:
-    return custom_response({'error': 'post not found'}, 404)
+    return custom_response({'error': 'post not found'}, 400)
   data = entity_schema.dump(post).data
   if data.get('owner_id') != g.user.get('id'):
-    return custom_response({'error': 'permission denied'}, 400)
+    return custom_response({'error': 'permission denied'}, 401)
 
   post.delete()
-  return custom_response({'message': 'deleted'}, 204)
+  return custom_response({'message': 'deleted'}, 200)
 
 
   

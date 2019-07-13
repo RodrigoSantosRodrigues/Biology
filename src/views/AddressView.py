@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
-#/src/views/ClienteView.py
+#/src/views/AddressView.py
 
 """
     ...Web Flask com autorização JWT (Jason web token authorization)
     ------------------------------------------------------------------------
-                        API do Cliente
+                        API do Address
     ------------------------------------------------------------------------
     
     URLs: https://codeburst.io/jwt-authorization-in-flask-c63c1acf4eeb
@@ -17,20 +17,19 @@
 
 from flask import request, g, Blueprint, json, Response
 from ..shared.Authentication import Auth
-from ..models.ClienteModel import ClienteModel, ClienteSchema
-from ..models.EntityModel import EntityModel, EntitySchema
+from ..models.AddressModel import AddressModel, AddressSchema
+from ..models.UserModel import UserModel, UserSchema
 
-cliente_api = Blueprint('cliente_api', __name__)
-cliente_schema = ClienteSchema()
-entity_schema= EntitySchema()
+address_api = Blueprint('address_api', __name__)
+address_schema = AddressSchema()
+UserSchema = UserSchema()
 
 
-
-@cliente_api.route('/', methods=['POST'])
+@address_api.route('/', methods=['POST'])
 @Auth.auth_required
 def create():
   """
-  Create Cliente Function
+  Create Address Function
   """
   ##para obter o objeto JSON do corpo da solicitação
   req_data = request.get_json()
@@ -38,86 +37,89 @@ def create():
   #validar e desserializar dados json de entrada do usuário
   req_data['owner_id'] = g.user.get('id')
 
-  #consultar dados de Entity
-  post_entity= EntityModel.get_entity_by_user(req_data['owner_id'])
-  if not post_entity:
-    return custom_response({'error': 'account in post not found'}, 404)
-  data_entity = entity_schema.dump(post_entity).data
-
-  req_data['entity_id']= data_entity['id']
-
-  data, error = cliente_schema.load(req_data)
+  data, error = address_schema.load(req_data)
   if error:
     return custom_response(error, 400)
 
-  post = ClienteModel(data)
+  post = AddressModel(data)
   post.save()
-  data = cliente_schema.dump(post).data
-  return custom_response(data, 201)
+  data = address_schema.dump(post).data
+  return custom_response(data, 200)
 
 
 
 
-@cliente_api.route('/', methods=['GET'])
+@address_api.route('/', methods=['GET'])
 def get_all():
   """
-  Get All Clientes
+  Get All Addresss
   """
-  posts = ClienteModel.get_all_clientes()
-  data = cliente_schema.dump(posts, many=True).data
+  req_data['owner_id'] = g.user.get('id')
+
+  post_user= UserModel.get_one_user(req_data.get('owner_id'))
+  if not post_user:
+    return custom_response({'error': 'user not found'}, 400)
+  data_user= UserSchema.dump(post_user).data
+
+  if data_user.get('role') != 'Admin':
+    return custom_response({'error': 'permission denied'}, 401)
+
+  posts = AddressModel.get_all_addresss()
+  data = address_schema.dump(posts, many=True).data
   return custom_response(data, 200)
 
 
 
 
-@cliente_api.route('/<int:cliente_id>', methods=['GET'])
-def get_one(cliente_id):
+@address_api.route('/<int:address_id>', methods=['GET'])
+def get_one(address_id):
   """
-  Get A Cliente
+  Get A Address
   """
-  post = ClienteModel.get_one_cliente(cliente_id)
+  
+  post = AddressModel.get_one_address(address_id)
   if not post:
     return custom_response({'error': 'post not found'}, 404)
-  data = cliente_schema.dump(post).data
+  data = address_schema.dump(post).data
   return custom_response(data, 200)
 
 
 
 
-@cliente_api.route('/<int:cliente_id>', methods=['PUT'])
+@address_api.route('/<int:address_id>', methods=['PUT'])
 @Auth.auth_required
-def update(cliente_id):
+def update(address_id):
   """
-  Update A Cliente
+  Update A Address
   """
   req_data = request.get_json()
-  post = ClienteModel.get_one_cliente(cliente_id)
+  post = AddressModel.get_one_address(address_id)
   if not post:
     return custom_response({'error': 'post not found'}, 404)
-  data = cliente_schema.dump(post).data
+  data = address_schema.dump(post).data
   if data.get('owner_id') != g.user.get('id'):
     return custom_response({'error': 'permission denied'}, 400)
   
-  data, error = cliente_schema.load(req_data, partial=True)
+  data, error = address_schema.load(req_data, partial=True)
   if error:
     return custom_response(error, 400)
   post.update(data)
   
-  data = cliente_schema.dump(post).data
+  data = address_schema.dump(post).data
   return custom_response(data, 200)
 
 
 
-@cliente_api.route('/<int:cliente_id>', methods=['DELETE'])
+@address_api.route('/<int:address_id>', methods=['DELETE'])
 @Auth.auth_required
-def delete(cliente_id):
+def delete(address_id):
   """
-  Delete A Cliente
+  Delete A Address
   """
-  post = ClienteModel.get_one_cliente(cliente_id)
+  post = AddressModel.get_one_address(address_id)
   if not post:
     return custom_response({'error': 'post not found'}, 404)
-  data = cliente_schema.dump(post).data
+  data = address_schema.dump(post).data
   if data.get('owner_id') != g.user.get('id'):
     return custom_response({'error': 'permission denied'}, 400)
 

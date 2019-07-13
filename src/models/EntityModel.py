@@ -15,7 +15,7 @@
     ficariam no banco de dados. Os modelos definem como os registros podem ser manipulados ou recuperados no 
     banco de dados.
 
-    Dados de Entity que serão buscados ao gerar boletos
+    Dados de Entity 
 
     
 """
@@ -28,9 +28,6 @@ from .ClienteModel import ClienteSchema
 class EntityModel(db.Model):
   """
   User Entity
-
-  Os campos de name, cidade, uf... na biblioteca python_boleto têm prefixo ou sufixo "cedente" 
-        Ex: cedente, agencia_cedente, cedente_cidade, cedente_uf
   """
 
   # table name
@@ -39,10 +36,12 @@ class EntityModel(db.Model):
   id = db.Column(db.Integer, primary_key=True)
   name = db.Column(db.String(128), nullable=False)
   documento = db.Column(db.String(128), nullable=False, unique=True)
+  image= db.Column(db.Text, nullable=True)
   created_at = db.Column(db.DateTime)
   modified_at = db.Column(db.DateTime)
   owner_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, unique=True)
-  clientes = db.relationship('ClienteModel', backref='clientes', lazy=True)
+  address = db.relationship('AddressModel', backref='adresss', lazy=True)
+  Profile = db.relationship('ProfileModel', backref='profiles', lazy=True)
 
   # class constructor - definir os atributos de classe
   def __init__(self, data):
@@ -51,6 +50,7 @@ class EntityModel(db.Model):
     """
     self.name= data.get('name')
     self.documento= data.get('documento')
+    self.image.get('image')
     self.owner_id= data.get('owner_id')
     self.created_at = datetime.datetime.utcnow()
     self.modified_at = datetime.datetime.utcnow()
@@ -100,8 +100,10 @@ class EntitySchema(Schema):
   id = fields.Int(dump_only=True)
   name= fields.Str(required=True)
   documento= fields.Str(required=True)
+  image= fields.Str(required=False)
   created_at = fields.DateTime(dump_only=True)
   modified_at = fields.DateTime(dump_only=True)
   owner_id = fields.Int(required=True)
-  clientes = fields.Nested(ClienteSchema, many=True)
+  address = fields.Nested(AddressSchema, many=True)
+  profiles = fields.Nested(ProfileSchema, many=True)
   
