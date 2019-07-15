@@ -23,7 +23,8 @@
 from marshmallow import fields, Schema
 import datetime
 from . import db, bcrypt
-from .ClienteModel import ClienteSchema
+from .AddressModel import AddressSchema
+from .ProfileModel import ProfileSchema
 
 class EntityModel(db.Model):
   """
@@ -37,11 +38,12 @@ class EntityModel(db.Model):
   name = db.Column(db.String(128), nullable=False)
   documento = db.Column(db.String(128), nullable=False, unique=True)
   image= db.Column(db.Text, nullable=True)
+  deleted = db.Column(db.Boolean, default=False, nullable= True)
   created_at = db.Column(db.DateTime)
   modified_at = db.Column(db.DateTime)
   owner_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, unique=True)
   address = db.relationship('AddressModel', backref='adresss', lazy=True)
-  Profile = db.relationship('ProfileModel', backref='profiles', lazy=True)
+  #Profile = db.relationship('ProfileModel', backref='profiles', lazy=True)
 
   # class constructor - definir os atributos de classe
   def __init__(self, data):
@@ -52,6 +54,7 @@ class EntityModel(db.Model):
     self.documento= data.get('documento')
     self.image.get('image')
     self.owner_id= data.get('owner_id')
+    self.deleted = data.get('deleted')
     self.created_at = datetime.datetime.utcnow()
     self.modified_at = datetime.datetime.utcnow()
 
@@ -77,17 +80,16 @@ class EntityModel(db.Model):
   
   @staticmethod
   def get_one_entity(id): #obter um único Entity do db usando campo primary_key
-    return EntityModel.query.get(id)
-    
-  @staticmethod
-  def get_entity_by_user(owner_id): #obter um único Entity de Entity do db usando o id do user
-    return EntityModel.query.filter_by(owner_id=owner_id).first() 
+    return EntityModel.query.filter_by(id=id, deleted=False).fisrt()
   
   @staticmethod
-  def get_entity_by_documento(value):
-    return EntityModel.query.filter_by(documento=value).first()
+  def get_entity_by_user(owner_id):
+    return EntityModel.query.filter_by(owner_id= owner_id, deleted=False).fisrt()
+  
+  @staticmethod
+  def get_entity_by_documento(documento):
+    return EntityModel.query.filter_by(documento= documento, deleted=False).fisrt()
 
-  
   """Métodos estáticos adicionais"""
   #retornar uma representação imprimível do objeto UserModel, neste caso estamos apenas retornando o id
   def __repr(self):
@@ -101,9 +103,10 @@ class EntitySchema(Schema):
   name= fields.Str(required=True)
   documento= fields.Str(required=True)
   image= fields.Str(required=False)
+  deleted= fields.Boolean(required=False)
   created_at = fields.DateTime(dump_only=True)
   modified_at = fields.DateTime(dump_only=True)
   owner_id = fields.Int(required=True)
   address = fields.Nested(AddressSchema, many=True)
-  profiles = fields.Nested(ProfileSchema, many=True)
+  profile = fields.Nested(ProfileSchema, many=True)
   

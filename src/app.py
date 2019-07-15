@@ -14,45 +14,65 @@
 
 """
 
-from flask import Flask
+from flask import Flask, render_template
 
 from .config import app_config
 from .models import db, bcrypt
 
 # import user_api blueprint
 from .views.UserView import user_api as user_blueprint
-from .views.BoletoView import boleto_api as boleto_blueprint
 from .views.EntityView import entity_api as entity_blueprint
-from .views.ClienteView import cliente_api as cliente_blueprint
-from .views.ContaView import conta_api as conta_blueprint
+from .views.AddressView import address_api as address_blueprint
+from .views.ProfileView import profile_api as profile_blueprint
+from .views.ProfessionView import profession_api as profession_blueprint
+
+from flask_swagger_ui import get_swaggerui_blueprint
+
 
 def create_app(env_name):
   """
     param: env_name -> necessário para carregar nossa configuração no modo development ou production
+
+    DOC API USING SWAGGER UI  
     Create app
   """
   
   # app initiliazation
-  app = Flask(__name__)
+  APP = Flask(__name__)
 
-  app.config.from_object(app_config[env_name])
+  APP.config.from_object(app_config[env_name])
 
   # initializing bcrypt and db
-  bcrypt.init_app(app)
-  db.init_app(app)
+  bcrypt.init_app(APP)
+  db.init_app(APP)
 
-  app.register_blueprint(user_blueprint, url_prefix='/api/users')
-  app.register_blueprint(boleto_blueprint, url_prefix='/api/boletos')
-  app.register_blueprint(entity_blueprint, url_prefix='/api/entities')
-  app.register_blueprint(cliente_blueprint, url_prefix='/api/clientes')
-  app.register_blueprint(conta_blueprint, url_prefix='/api/contas')
+  ### swagger specific ###
+  SWAGGER_URL = '/apidocs'
+  API_URL = '/static/api/openapi.json'
+  SWAGGERUI_BLUEPRINT = get_swaggerui_blueprint(
+    SWAGGER_URL,
+    API_URL,
+    config={
+        'app_name': "Biology Database API"
+    }
+  )
+  APP.register_blueprint(SWAGGERUI_BLUEPRINT, url_prefix=SWAGGER_URL)
+  ### end swagger specific ###
 
-  @app.route('/', methods=['GET'])
+
+  APP.register_blueprint(user_blueprint, url_prefix='/api/users')
+  APP.register_blueprint(entity_blueprint, url_prefix='/api/entities')
+  APP.register_blueprint(address_blueprint, url_prefix='/api/addresss')
+  APP.register_blueprint(profile_blueprint, url_prefix='/api/profiles')
+  APP.register_blueprint(profession_blueprint, url_prefix='/api/professions')
+
+
+
+  @APP.route('/', methods=['GET'])
   def index():
     """
     Home
     """
-    return "Congratulations! You're in Boleto Viewer."
+    return render_template('index.html')
 
-  return app
-
+  return APP

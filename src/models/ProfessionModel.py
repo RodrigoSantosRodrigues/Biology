@@ -22,12 +22,11 @@ from marshmallow import fields, Schema
 import datetime
 from . import db, bcrypt
 
+
 class ProfessionModel(db.Model):
   """
   User Profession
 
-  Os campos de name, cidade, uf... na biblioteca python_boleto têm prefixo ou sufixo "cedente" 
-        Ex: cedente, agencia_cedente, cedente_cidade, cedente_uf
   """
 
   # table name
@@ -36,9 +35,11 @@ class ProfessionModel(db.Model):
   id = db.Column(db.Integer, primary_key=True)
   name = db.Column(db.String(128), nullable=False)
   descricao = db.Column(db.String(128), nullable=True)
+  deleted = db.Column(db.Boolean, default=False, nullable= True)
   created_at = db.Column(db.DateTime)
   modified_at = db.Column(db.DateTime)
   owner_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+  profile = db.relationship('ProfileModel', backref='profiles', lazy=True)
  
 
   # class constructor - definir os atributos de classe
@@ -48,6 +49,7 @@ class ProfessionModel(db.Model):
     """
     self.name= data.get('name')
     self.descricao= data.get('descricao')
+    self.deleted = data.get('deleted')
     self.owner_id = data.get('owner_id')
     self.created_at = datetime.datetime.utcnow()
     self.modified_at = datetime.datetime.utcnow()
@@ -74,20 +76,8 @@ class ProfessionModel(db.Model):
   
   @staticmethod
   def get_one_profession(id): #obter um único Profession do db usando campo primary_key
-    return ProfessionModel.query.get(id)
+    return ProfessionModel.query.filter_by(id=id, deleted=False).fisrt()
     
-  @staticmethod
-  def get_profession_by_user(owner_id): #obter um único Profession de Profession do db usando o id do user
-    return ProfessionModel.query.filter_by(owner_id=owner_id).one() 
-
-  @staticmethod
-  def get_profession_by_nossonumero(value): #obter um único Profession de Profession do db usando o id do user
-    return ProfessionModel.query.filter_by(nosso_numero=value).one() 
-  
-  @staticmethod
-  def get_profession_by_codigocliente_and_codigobanco(codigocliente, codigobanco):
-    return professionModel.query.filter_by(owner_id=codigocliente).filter_by(codigo_banco=codigobanco).one()
-
   
   """Métodos estáticos adicionais"""
   #retornar uma representação imprimível do objeto ProfessionModel, neste caso estamos apenas retornando o id
@@ -102,6 +92,7 @@ class ProfessionSchema(Schema):
   id = fields.Int(dump_only=True)
   name= fields.Str(required= True)
   descricao= fields.Integer(required=False)
+  deleted= fields.Boolean(required=False)
   owner_id = fields.Int(required=True)
   created_at = fields.DateTime(dump_only=True)
   modified_at = fields.DateTime(dump_only=True)

@@ -19,9 +19,7 @@
 from marshmallow import fields, Schema
 import datetime
 from . import db, bcrypt
-from .BoletoModel import BoletoSchema
 from .EntityModel import EntitySchema
-from .ClienteModel import ClienteSchema
 
 class UserModel(db.Model):
   """
@@ -36,9 +34,10 @@ class UserModel(db.Model):
   email = db.Column(db.String(128), unique=True, nullable=False)
   password = db.Column(db.String(128), nullable=False)
   role = db.Column(db.String(128), nullable=False)
+  deleted = db.Column(db.Boolean, default=False, nullable= True)
   created_at = db.Column(db.DateTime)
   modified_at = db.Column(db.DateTime)
-  entities = db.relationship('EntityModel', backref='entitiess', lazy=True)
+  entities = db.relationship('EntityModel', backref='entities', lazy=True)
  
 
   # class constructor - definir os atributos de classe
@@ -50,6 +49,7 @@ class UserModel(db.Model):
     self.email = data.get('email')
     self.password = self.__generate_hash(data.get('password'))
     self.role = data.get('role')
+    self.deleted = data.get('deleted')
     self.created_at = datetime.datetime.utcnow()
     self.modified_at = datetime.datetime.utcnow()
 
@@ -78,11 +78,11 @@ class UserModel(db.Model):
 
   @staticmethod
   def get_one_user(id): #obter um único usuário do db usando campo primary_key
-    return UserModel.query.get(id)
+    return UserModel.query.filter_by(id=id, deleted=False).first()
   
   @staticmethod
   def get_user_by_email(value):
-    return UserModel.query.filter_by(email=value).first()
+    return UserModel.query.filter_by(email=value, deleted=False).first()
   
   """Métodos estáticos adicionais"""
   #saremos __generate_hash() a senha do usuário de hash antes de salvá-lo no banco de dados
@@ -103,6 +103,7 @@ class UserSchema(Schema):
   email = fields.Email(required=True)
   password = fields.Str(required=True, load_only=True)
   role = fields.Str(required=True)
+  deleted= fields.Boolean(required=False)
   created_at = fields.DateTime(dump_only=True)
   modified_at = fields.DateTime(dump_only=True)
   entities = fields.Nested(EntitySchema, many=True)

@@ -1,0 +1,1172 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Biology Database API",
+    "description": "Api rest to register users in a database for genetic biological applications. Go to [Home page](http://localhost:5000/) for more information.",
+    "version": "1.0.0",
+    "termsOfService": "http://localhost:5000",
+    "contact": {
+      "email": "rodrjuniorsantos@gmail.com"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:5000",
+      "description": "Primary server, e.g. Main (production) server"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "APIKeyHeader": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "api-token"
+      }
+    }
+  },
+  "paths": {
+    "/api/users/user": {
+      "post": {
+        "summary": "Create a user Function. It will return the JWT token if the request was successful",
+        "tags": [
+          "User"
+        ],
+        "requestBody": {
+          "description": "User Functions",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "name",
+                  "email",
+                  "password",
+                  "role"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string"
+                  },
+                  "password": {
+                    "type": "string"
+                  },
+                  "role": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User successfully registered"
+          },
+          "400": {
+            "description": "User already exist, please supply another email address"
+          }
+        }
+      }
+    },
+    "/api/users/user_all": {
+      "get": {
+        "summary": "Get all users Function",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "tags": [
+          "User"
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns all users"
+          },
+          "400": {
+            "description": "User not found"
+          },
+          "401": {
+            "description": "Permission denied"
+          }
+        }
+      }
+    },
+    "/api/users/{user_id}": {
+      "get": {
+        "summary": "Gets a user by ID.",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "tags": [
+          "User"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "user_id",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "The user ID."
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Data this user successfully"
+          },
+          "400": {
+            "description": "user not found"
+          },
+          "401": {
+            "description": "Permission denied"
+          }
+        }
+      }
+    },
+    "/api/users/edit/{me}": {
+      "put": {
+        "summary": "Update A User.",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "tags": [
+          "User"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "me",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The user ID."
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "User Functions",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "name",
+                  "email",
+                  "password",
+                  "role"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string"
+                  },
+                  "password": {
+                    "type": "string"
+                  },
+                  "role": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User successfully update"
+          },
+          "400": {
+            "description": "Missing data"
+          }
+        }
+      }
+    },
+    "/api/users/delete/me": {
+      "delete": {
+        "summary": "Return your user data.",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "tags": [
+          "User"
+        ],
+        "responses": {
+          "200": {
+            "description": "An Access Token API to be used in Boleto Viewer"
+          }
+        }
+      }
+    },
+    "/api/users/login": {
+      "post": {
+        "summary": "User Login Function In API, return a token API.",
+        "tags": [
+          "User"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string"
+                  },
+                  "password": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "An Access Token API to be used in Boleto Viewer"
+          },
+          "400": {
+            "description": "you need email and password to sign in"
+          },
+          "401": {
+            "description": "you need email and password to sign in"
+          },
+          "402": {
+            "description": "Credentials are not valid"
+          },
+          "403": {
+            "description": "Credentials are not valid"
+          }
+        }
+      }
+    },
+    "/api/users/me": {
+      "get": {
+        "summary": "Return your user data.",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "tags": [
+          "User"
+        ],
+        "responses": {
+          "200": {
+            "description": "An Access Token API to be used in Boleto Viewer"
+          },
+          "400": {
+            "description": "user in post not found"
+          }
+        }
+      }
+    },
+    "/api/entities/entity": {
+      "post": {
+        "summary": "Create Profession Function.",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "tags": [
+          "Entity"
+        ],
+        "requestBody": {
+          "description": "Entity Functions",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "name",
+                  "documento"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "documento": {
+                    "type": "string"
+                  },
+                  "image": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Entity successfully registered"
+          },
+          "400": {
+            "description": "Missing data"
+          },
+          "401": {
+            "description": "Document already exists for this user, please supply another document"
+          },
+          "402": {
+            "description": "There is already a registration for this user"
+          }
+        }
+      }
+    },
+    "/api/entities/entities_all": {
+      "get": {
+        "summary": "Get all entities Function",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "tags": [
+          "Entity"
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns all entities"
+          },
+          "400": {
+            "description": "User not found"
+          },
+          "401": {
+            "description": "Permission denied"
+          }
+        }
+      }
+    },
+    "/api/entities/{entity_id}": {
+      "get": {
+        "summary": "Gets a entity by ID.",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "tags": [
+          "Entity"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "The entity ID."
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Data this entity successfully"
+          },
+          "400": {
+            "description": "user not found"
+          },
+          "401": {
+            "description": "Permission denied"
+          }
+        }
+      }
+    },
+    "/api/entities/edit/{entity_id}": {
+      "put": {
+        "summary": "Update A Entity.",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "tags": [
+          "Entity"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "The Entity ID."
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Entity Functions",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "name",
+                  "documento"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "documento": {
+                    "type": "string"
+                  },
+                  "image": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Entity successfully update"
+          },
+          "400": {
+            "description": "Entity not found"
+          },
+          "401": {
+            "description": "Permission denied"
+          },
+          "402": {
+            "description": "Missing data"
+          },
+          "403": {
+            "description": "Document already exists for this user, please supply another document"
+          },
+          "404": {
+            "description": "There is already a registration for this user"
+          }
+        }
+      }
+    },
+    "/api/entities/delete/{entity_id}": {
+      "delete": {
+        "summary": "Delete a entity by ID.",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "tags": [
+          "Entity"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "The entity ID."
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Entity successfully deleted"
+          },
+          "400": {
+            "description": "Entity not found"
+          },
+          "401": {
+            "description": "Permission denied"
+          }
+        }
+      }
+    },
+    "/api/profiles/profile": {
+      "post": {
+        "summary": "Create Profile Function.",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "tags": [
+          "Profile"
+        ],
+        "requestBody": {
+          "description": "Profile Functions",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "Search_area",
+                  "idade",
+                  "sexo"
+                ],
+                "properties": {
+                  "Search_area": {
+                    "type": "string"
+                  },
+                  "idade": {
+                    "type": "string"
+                  },
+                  "sexo": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Profile successfully registered"
+          },
+          "400": {
+            "description": "Account in post not found"
+          },
+          "401": {
+            "description": "Missing data"
+          }
+        }
+      }
+    },
+    "/api/users/profiles_all": {
+      "get": {
+        "summary": "Get all profiles Function",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "tags": [
+          "Profile"
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns all profiles"
+          },
+          "400": {
+            "description": "User not found"
+          },
+          "401": {
+            "description": "Permission denied"
+          }
+        }
+      }
+    },
+    "/api/profiles/{profile_id}": {
+      "get": {
+        "summary": "Gets a profile by ID.",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "tags": [
+          "Profile"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "profile_id",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "The profile ID."
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Data this profile successfully"
+          },
+          "400": {
+            "description": "user not found"
+          },
+          "401": {
+            "description": "Permission denied"
+          }
+        }
+      }
+    },
+    "/api/profiles/edit/{profile_id}": {
+      "put": {
+        "summary": "Update A Profile.",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "tags": [
+          "Profile"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "profile_id",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "The user ID."
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Profile Functions",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "Search_area",
+                  "idade",
+                  "sexo"
+                ],
+                "properties": {
+                  "Search_area": {
+                    "type": "string"
+                  },
+                  "idade": {
+                    "type": "string"
+                  },
+                  "sexo": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Profile successfully update"
+          },
+          "400": {
+            "description": "Profile not found"
+          },
+          "401": {
+            "description": "Permission denied"
+          },
+          "402": {
+            "description": "Missing data"
+          }
+        }
+      }
+    },
+    "/api/profiles/delete/{profile_id}": {
+      "delete": {
+        "summary": "Delete a profile by ID.",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "tags": [
+          "Profile"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "profile_id",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "The profile ID."
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Profile successfully deleted"
+          },
+          "400": {
+            "description": "Profile not found"
+          },
+          "401": {
+            "description": "Permission denied"
+          }
+        }
+      }
+    },
+    "/api/professions/profession": {
+      "post": {
+        "summary": "Create Profession Function.",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "tags": [
+          "Profession"
+        ],
+        "requestBody": {
+          "description": "Profession Functions",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "name",
+                  "descricao"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "descricao": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Profession successfully registered"
+          },
+          "400": {
+            "description": "Missing data"
+          }
+        }
+      }
+    },
+    "/api/professions/professions_all": {
+      "get": {
+        "summary": "Get all professions Function",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "tags": [
+          "Profession"
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns all professions"
+          },
+          "400": {
+            "description": "User not found"
+          },
+          "401": {
+            "description": "Permission denied"
+          }
+        }
+      }
+    },
+    "/api/professions/{profession_id}": {
+      "get": {
+        "summary": "Gets a profession by ID.",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "tags": [
+          "Profession"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "profession_id",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "The profession ID."
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Data this profession successfully"
+          },
+          "400": {
+            "description": "user not found"
+          },
+          "401": {
+            "description": "Permission denied"
+          }
+        }
+      }
+    },
+    "/api/professions/edit/{profession_id}": {
+      "put": {
+        "summary": "Update A Profesion.",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "tags": [
+          "Profession"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "profession_id",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "The profession ID."
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Profession Functions",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "name",
+                  "descricao"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "descricao": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Profesion successfully update"
+          },
+          "400": {
+            "description": "Profession not found"
+          },
+          "401": {
+            "description": "Permission denied"
+          },
+          "402": {
+            "description": "Missing data"
+          }
+        }
+      }
+    },
+    "/api/professions/delete/{profession_id}": {
+      "delete": {
+        "summary": "Delete a profession by ID.",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "tags": [
+          "Profession"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "profession_id",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "The profession ID."
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Profession successfully deleted"
+          },
+          "400": {
+            "description": "Profession not found"
+          },
+          "401": {
+            "description": "Permission denied"
+          }
+        }
+      }
+    },
+    "/api/addresss/address": {
+      "post": {
+        "summary": "Create Adress Function.",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "tags": [
+          "Address"
+        ],
+        "requestBody": {
+          "description": "Adress Functions",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "name",
+                  "cidade",
+                  "uf",
+                  "rua",
+                  "bairro",
+                  "cep"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "cidade": {
+                    "type": "string"
+                  },
+                  "uf": {
+                    "type": "string"
+                  },
+                  "rua": {
+                    "type": "string"
+                  },
+                  "bairro": {
+                    "type": "string"
+                  },
+                  "cep": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Adress successfully registered"
+          },
+          "400": {
+            "description": "Missing data"
+          }
+        }
+      }
+    },
+    "/api/addresss/addresss_all": {
+      "get": {
+        "summary": "Get all address Function",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "tags": [
+          "Address"
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns all address"
+          },
+          "400": {
+            "description": "User not found"
+          },
+          "401": {
+            "description": "Permission denied"
+          }
+        }
+      }
+    },
+    "/api/addresss/{address_id}": {
+      "get": {
+        "summary": "Gets a address by ID.",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "tags": [
+          "Address"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "address_id",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "The address ID."
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Data this address successfully"
+          },
+          "400": {
+            "description": "user not found"
+          },
+          "401": {
+            "description": "Permission denied"
+          }
+        }
+      }
+    },
+    "/api/addresss/edit/{address_id}": {
+      "put": {
+        "summary": "Update A Address.",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "tags": [
+          "Address"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "address_id",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "The Address ID."
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Adress Functions",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "name",
+                  "cidade",
+                  "uf",
+                  "rua",
+                  "bairro",
+                  "cep"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "cidasde": {
+                    "type": "string"
+                  },
+                  "uf": {
+                    "type": "string"
+                  },
+                  "rua": {
+                    "type": "string"
+                  },
+                  "bairro": {
+                    "type": "string"
+                  },
+                  "cep": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Address successfully update"
+          },
+          "400": {
+            "description": "Address not found"
+          },
+          "401": {
+            "description": "Permission denied"
+          },
+          "402": {
+            "description": "Missing data"
+          }
+        }
+      }
+    },
+    "/api/addresss/delete/{address_id}": {
+      "delete": {
+        "summary": "Delete a address by ID.",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "tags": [
+          "Address"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "address_id",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "The address ID."
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Address successfully deleted"
+          },
+          "400": {
+            "description": "Address not found"
+          },
+          "401": {
+            "description": "Permission denied"
+          }
+        }
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "User",
+      "description": "User Login"
+    },
+    {
+      "name": "Entity",
+      "description": "Access to Entity"
+    },
+    {
+      "name": "Address",
+      "description": "Address Functions"
+    },
+    {
+      "name": "Profile",
+      "description": "Profile Functions"
+    },
+    {
+      "name": "Profession",
+      "description": "Profession Fuctions"
+    }
+  ]
+}

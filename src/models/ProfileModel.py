@@ -28,8 +28,6 @@ class ProfileModel(db.Model):
   """
   User Profile
 
-  Os campos de name, cidade, uf... na biblioteca python_boleto têm prefixo ou sufixo "cedente" 
-        Ex: cedente, agencia_cedente, cedente_cidade, cedente_uf
   """
 
   # table name
@@ -37,15 +35,15 @@ class ProfileModel(db.Model):
 
   id = db.Column(db.Integer, primary_key=True)
   Search_area = db.Column(db.String(128), nullable=False)
-  idade = db.Column(db.Integer(128), nullable=False)
+  idade = db.Column(db.Integer, nullable=False)
   sexo = db.Column(db.String(128), nullable=False)
   created_at = db.Column(db.DateTime)
   modified_at = db.Column(db.DateTime)
   deleted = db.Column(db.Boolean, default=False, nullable= True)
   astyanax = db.Column(db.Boolean, default=False, nullable= True)
   kariofish = db.Column(db.Boolean, default=False, nullable= True)
-  profession_id = db.Column(db.Integer, db.ForeignKey('profession.id'), nullable=False)
-  entity_id = db.Column(db.Integer, db.ForeignKey('clientes.id'), nullable=False)
+  profession_id = db.Column(db.Integer, db.ForeignKey('professions.id'), nullable=False)
+  entity_id = db.Column(db.Integer, db.ForeignKey('entities.id'), nullable=False)
   owner_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
  
 
@@ -60,7 +58,7 @@ class ProfileModel(db.Model):
     self.astyanax = data.get('astyanax')
     self.kariofish = data.get('kariofish')
     self.profession_id = data.get('profession_id')
-    self.entity_id = data.get('entity_id')
+    self.entity_id= data.get('entity_id')
     self.owner_id = data.get('owner_id')
     self.deleted = data.get('deleted')
     self.created_at = datetime.datetime.utcnow()
@@ -88,19 +86,8 @@ class ProfileModel(db.Model):
   
   @staticmethod
   def get_one_profile(id): #obter um único Profile do db usando campo primary_key
-    return ProfileModel.query.get(id)
+    return ProfileModel.query.filter_by(id=id, deleted=False).first()
     
-  @staticmethod
-  def get_profile_by_user(owner_id): #obter um único Profile de Profile do db usando o id do user
-    return ProfileModel.query.filter_by(owner_id=owner_id).one() 
-
-  @staticmethod
-  def get_profile_by_nossonumero(value): #obter um único Profile de Profile do db usando o id do user
-    return ProfileModel.query.filter_by(nosso_numero=value).one() 
-  
-  @staticmethod
-  def get_profile_by_codigocliente_and_codigobanco(codigocliente, codigobanco):
-    return profileModel.query.filter_by(owner_id=codigocliente).filter_by(codigo_banco=codigobanco).one()
 
   
   """Métodos estáticos adicionais"""
@@ -117,6 +104,7 @@ class ProfileSchema(Schema):
   Search_area= fields.Str(required= True)
   idade= fields.Integer(required=True)
   sexo = fields.Str(required=True)
+  deleted= fields.Boolean(required=False)
   astyanax = fields.Boolean(required=False)
   kariofish = fields.Boolean(required=False)
   profession_id= fields.Int(required=True)

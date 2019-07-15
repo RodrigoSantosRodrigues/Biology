@@ -21,8 +21,8 @@ from flask_bcrypt import Bcrypt
 db = SQLAlchemy()
 bcrypt = Bcrypt()
 
-from .ContaModel import ContaModel, ContaSchema
-from .ClienteModel import ClienteModel, ClienteSchema
+from .ProfessionModel import ProfessionModel, ProfessionSchema
+from .ProfileModel import ProfileModel, ProfileSchema
+from .AddressModel import AddressModel, AddressSchema
 from .EntityModel import EntityModel, EntitySchema
-from .BoletoModel import BoletoModel, BoletoSchema
 from .UserModel import UserModel, UserSchema

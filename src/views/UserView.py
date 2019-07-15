@@ -34,12 +34,49 @@ from ..shared.Authentication import Auth
 user_api = Blueprint('user_api', __name__) 
 user_schema = UserSchema()
 
-@user_api.route('/', methods=['POST'])
+
+
+
+@user_api.route('/user', methods=['POST'])
 def create():
   """
-  Retornará o token JWT se a solicitação foi bem-sucedida
+  
 
   Create User Function
+  --- 
+  /api/users/user:
+    post:
+      summary: Create a user Function. It will return the JWT token if the request was successful
+      tags:
+        - User
+      requestBody:
+        description: User Functions
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - email
+                - password
+                - role
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+                password:
+                  type: string
+                role:
+                  type: string
+  
+      responses:
+        '200':
+          description: User successfully registered
+        '400':
+          description: User already exist, please supply another email address
+
   """
   req_data = request.get_json() #para obter o objeto JSON do corpo da solicitação
   
@@ -54,7 +91,7 @@ def create():
   user_in_db = UserModel.get_user_by_email(data.get('email'))
   if user_in_db:
     message = {'error': 'User already exist, please supply another email address'}
-    return custom_response(message, 401)
+    return custom_response(message, 400)
   
   user = UserModel(data)
   user.save()
@@ -64,7 +101,12 @@ def create():
   return custom_response({'jwt_token': token}, 200)
 
 
-@user_api.route('/', methods=['GET'])
+
+
+
+
+
+@user_api.route('/users_all', methods=['GET'])
 @Auth.auth_required
 def get_all():
   """
@@ -72,10 +114,38 @@ def get_all():
 
    endpoint que obterá todos os dados do usuário no banco de dados e 
    somente um usuário com um token válido poderá acessar essa rota.
+   --- 
+  /api/users/user_all:
+    get:
+      summary: Get all users Function
+      security:
+        - APIKeyHeader: []
+      tags:
+        - User
+      
+      responses:
+        '200':
+          description: Returns all users
+        '400':
+          description: User not found
+        '401':
+          description: Permission denied
   """
+  post_user= UserModel.get_one_user(g.user.get('id'))
+  if not post_user:
+    return custom_response({'error': 'user not found'}, 400)
+  data_user= UserSchema.dump(post_user).data
+
+  if data_user.get('role') != 'Admin':
+    return custom_response({'error': 'permission denied'}, 401)
+
   users = UserModel.get_all_users()
   ser_users = user_schema.dump(users, many=True).data
   return custom_response(ser_users, 200)
+
+
+
+
 
 
 @user_api.route('/<int:user_id>', methods=['GET'])
@@ -83,20 +153,94 @@ def get_all():
 def get_a_user(user_id):
   """
   Get a single user
+  ---
+  /api/users/{user_id}:
+    get:
+      summary: Gets a user by ID.
+      security:
+        - APIKeyHeader: []
+      tags:
+        - User
+      parameters:
+        - in: path
+          name: user_id
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+            description: The user ID.
+
+      responses:
+        '200':
+          description: Data this user successfully
+        '400':
+          description: user not found
+        '401':
+          description: Permission denied
   """
   user = UserModel.get_one_user(user_id)
   if not user:
     return custom_response({'error': 'user not found'}, 400)
+  data = user_schema.dump(user).data
+
+  if g.user.get('id') != data.get('owner_id'):
+    return custom_response({'error': 'permission denied'}, 401)
   
-  ser_user = user_schema.dump(user).data
-  return custom_response(ser_user, 200)
+  return custom_response(data, 200)
 
 
-@user_api.route('/me', methods=['PUT'])
+
+
+
+
+
+@user_api.route('/edit/me', methods=['PUT'])
 @Auth.auth_required
 def update():
   """
   Update me
+  ---
+  /api/users/edit/{me}:
+    put:
+      summary: Update A User.
+      security:
+        - APIKeyHeader: []
+      tags:
+        - User
+      parameters:
+        - in: path
+          name: me
+          required: true
+          schema:
+            type: string
+            description: The user ID.
+      requestBody:
+        description: User Functions
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - email
+                - password
+                - role
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+                password:
+                  type: string
+                role:
+                  type: string
+      responses:
+        '200':
+          description: User successfully update
+        '400':
+          description: Missing data
+      
   """
   req_data = request.get_json()
   data, error = user_schema.load(req_data, partial=True)
@@ -109,15 +253,38 @@ def update():
   return custom_response(ser_user, 200)
 
 
-@user_api.route('/me', methods=['DELETE'])
+
+
+
+
+@user_api.route('/delete/me', methods=['DELETE'])
 @Auth.auth_required
 def delete():
   """
   Delete a user
+  ---
+  /api/users/delete/me:
+    delete:
+      summary: Return your user data.
+      security:
+        - APIKeyHeader: []
+      tags:
+        - User
+      responses:
+        '200':
+          description: An Access Token API to be used in Boleto Viewer
   """
   user = UserModel.get_one_user(g.user.get('id'))
-  user.delete()
+  user['deleted']= True
+  user.update(data)
+  #user.delete()
   return custom_response({'message': 'deleted'}, 200)
+
+
+
+
+
+
 
 
 @user_api.route('/me', methods=['GET'])
@@ -125,10 +292,29 @@ def delete():
 def get_me():
   """
   Get me
+  ---
+  /api/users/me:
+    get:
+      summary: Return your user data.
+      security:
+        - APIKeyHeader: []
+      tags:
+        - User
+      responses:
+        '200':
+          description: An Access Token API to be used in Boleto Viewer
+        '400':
+          description: user in post not found
   """
   user = UserModel.get_one_user(g.user.get('id'))
   ser_user = user_schema.dump(user).data
   return custom_response(ser_user, 200)
+
+
+
+
+
+
 
 
 @user_api.route('/login', methods=['POST'])
@@ -137,6 +323,34 @@ def login():
   User Login Function
 
   endpoint de login- Precisamos configurar isso aqui para que um usuário possa obter um token
+
+  /api/users/login:
+    post:
+      summary: 'User Login Function In API, return a token API.'
+      tags:
+        - User
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: An Access Token API to be used in Boleto Viewer
+        '400':
+          description: you need email and password to sign in
+        '401':
+          description: you need email and password to sign in
+        '402':
+          description: Credentials are not valid
+        '403':
+          description: Credentials are not valid
   """
   req_data = request.get_json() # para obter os dados do corpo da solicitação
 
@@ -162,6 +376,8 @@ def login():
   return custom_response({'jwt_token': token}, 200)
 
   
+
+
 
 def custom_response(res, status_code):
   """

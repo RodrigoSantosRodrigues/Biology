@@ -19,8 +19,6 @@
 from marshmallow import fields, Schema
 import datetime
 from . import db, bcrypt
-from .BoletoModel import BoletoSchema
-from .ContaModel import ContaSchema
 
 class AddressModel(db.Model):
   """
@@ -37,6 +35,7 @@ class AddressModel(db.Model):
   rua = db.Column(db.String(128), nullable=False)
   bairro = db.Column(db.String(128), nullable=False)
   cep = db.Column(db.String(128), nullable=False)
+  deleted = db.Column(db.Boolean, default=False, nullable= True)
   created_at = db.Column(db.DateTime)
   modified_at = db.Column(db.DateTime)
   owner_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
@@ -53,6 +52,7 @@ class AddressModel(db.Model):
     self.rua= data.get('logradouro')
     self.bairro= data.get('bairro')
     self.cep= data.get('cep')
+    self.deleted = data.get('deleted')
     self.owner_id= data.get('owner_id')
     self.entity_id= data.get('entity_id')
     self.created_at = datetime.datetime.utcnow()
@@ -82,13 +82,8 @@ class AddressModel(db.Model):
   
   @staticmethod
   def get_one_address(id): #obter um único Address do db usando campo primary_key
-    return AddressModel.query.get(id)
+    return AddressModel.query.filter_by(id=id, deleted=False).fisrt()
 
-  @staticmethod
-  def get_address_by_user(owner_id): #obter um único Entity de Entity do db usando o id do user
-    return AddressModel.query.filter_by(owner_id=owner_id).first() 
-  
-  
   """Métodos estáticos adicionais"""
   #retornar uma representação imprimível do objeto UserModel, neste caso estamos apenas retornando o id
   def __repr(self):
@@ -100,11 +95,12 @@ class AddressModel(db.Model):
 class AddressSchema(Schema):
   id = fields.Int(dump_only=True)
   name = fields.Str(required=True)
-  cidade = fields.Str(required=False)
-  uf = fields.Str(required=False)
-  rua = fields.Str(required=False)
-  bairro = fields.Str(required=False)
-  cep = fields.Str(required=False)
+  cidade = fields.Str(required=True)
+  uf = fields.Str(required=True)
+  rua = fields.Str(required=True)
+  bairro = fields.Str(required=True)
+  cep = fields.Str(required=True)
+  deleted= fields.Boolean(required=False)
   created_at = fields.DateTime(dump_only=True)
   modified_at = fields.DateTime(dump_only=True)
   owner_id = fields.Int(required=True)

@@ -21,7 +21,7 @@ load_dotenv(find_dotenv())
 POSTGRES = {
     'user': 'postgres',
     'pw': 'root',
-    'db': 'boleto_db',
+    'db': 'biology',
     'host': 'localhost',
     'port': '5432',
 }
